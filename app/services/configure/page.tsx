@@ -3,15 +3,16 @@
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import FormBuilder from '@/components/form-builder/FormBuilder'
+import { AppLayout } from '@/components/layout/AppLayout'
 
 function ConfigureServiceContent() {
     const searchParams = useSearchParams()
     const formId = searchParams.get('id')
 
     return (
-        <div className="min-h-screen bg-background">
+        <AppLayout showSidebar={true} showHeader={false}>
             <FormBuilder formId={formId || undefined} />
-        </div>
+        </AppLayout>
     )
 }
 

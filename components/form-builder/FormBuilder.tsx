@@ -242,9 +242,9 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
             onDragEnd={handleDragEnd}
             onDragOver={handleDragOver}
         >
-            <div className="flex flex-col h-screen bg-muted/20">
+            <div className="flex flex-col h-screen bg-background">
                 <Toaster />
-                <header className="border-b bg-background p-4 flex justify-between items-center shadow-sm z-10">
+                <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 flex justify-between items-center shadow-sm">
                     <div className="flex items-center gap-4">
                         <Button
                             variant="ghost"

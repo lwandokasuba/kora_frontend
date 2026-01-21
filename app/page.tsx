@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Settings, Trash2, ArrowUpDown } from 'lucide-react'
+import { AppLayout } from '@/components/layout/AppLayout'
 
 const columnHelper = createColumnHelper<Form>()
 
@@ -137,7 +138,7 @@ export default function DashboardPage() {
     })
 
     return (
-        <div className="min-h-screen bg-background">
+        <AppLayout>
             <div className="container mx-auto py-8 px-4">
                 <div className="flex items-center justify-between mb-8">
                     <div>
@@ -230,6 +231,6 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-        </div>
+        </AppLayout>
     )
 }
