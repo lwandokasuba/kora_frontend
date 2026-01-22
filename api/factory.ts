@@ -1,5 +1,5 @@
 // api/factory.ts
-import { CreateGroup, CreateField, CreateService, CreateForm, CreateFormField, CreateSubmission, CreateFormAnswer, Group, Service, Form, FormField, Submission, FormAnswer, Field, DataType, CreateDataType, User, CreateUser, Collection, CreateCollection, CollectionItem, CreateCollectionItem } from '@/types';
+import { CreateGroup, CreateField, CreateService, CreateForm, CreateFormField, CreateSubmission, CreateFormAnswer, Group, Service, Form, FormField, Submission, FormAnswer, Field, DataType, CreateDataType, User, CreateUser, Collection, CreateCollection, CollectionItem, CreateCollectionItem, ReservedName, CreateReservedName } from '@/types';
 import { mockDb } from './mockClient';
 
 // Use NEXT_PUBLIC_ prefix
@@ -16,10 +16,11 @@ const mockApiClient = {
         // Simulate network delay
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        // Rest of the mock implementation remains the same...
         switch (endpoint) {
             case '/groups':
                 return mockDb.getGroups() as T;
+            case '/reserved-names':
+                return mockDb.getReservedNames() as T;
             case '/data-types':
                 return mockDb.getDataTypes() as T;
             case '/fields':
@@ -46,6 +47,11 @@ const mockApiClient = {
                     const id = parseInt(endpoint.split('/')[2]);
                     const group = mockDb.getGroup(id);
                     if (group) return group as T;
+                }
+                if (endpoint.startsWith('/reserved-names/')) {
+                    const id = parseInt(endpoint.split('/')[2]);
+                    const item = mockDb.getReservedName(id);
+                    if (item) return item as T;
                 }
                 if (endpoint.startsWith('/data-types/')) {
                     const id = parseInt(endpoint.split('/')[2]);
@@ -98,6 +104,11 @@ const mockApiClient = {
                 const group = mockDb.getGroup(id);
                 if (group) return group as T;
                 throw new Error(`Group with id ${id} not found`);
+            }
+            case '/reserved-names': {
+                const item = mockDb.getReservedName(id);
+                if (item) return item as T;
+                throw new Error(`ReservedName with id ${id} not found`);
             }
             case '/data-types': {
                 const dataType = mockDb.getDataType(id);
@@ -164,6 +175,8 @@ const mockApiClient = {
         switch (endpoint) {
             case '/groups':
                 return mockDb.createGroup(data as CreateGroup) as T;
+            case '/reserved-names':
+                return mockDb.createReservedName(data as CreateReservedName) as T;
             case '/data-types':
                 return mockDb.createDataType(data as CreateDataType) as T;
             case '/fields':
@@ -201,6 +214,11 @@ const mockApiClient = {
                 const result = mockDb.updateGroup(id, data as Partial<Group>);
                 if (result) return result as T;
                 throw new Error('Group not found');
+            }
+            case '/reserved-names': {
+                const result = mockDb.updateReservedName(id, data as Partial<ReservedName>);
+                if (result) return result as T;
+                throw new Error('ReservedName not found');
             }
             case '/data-types': {
                 const result = mockDb.updateDataType(id, data as Partial<DataType>);
@@ -268,6 +286,11 @@ const mockApiClient = {
             case '/groups': {
                 const success = mockDb.deleteGroup(id);
                 if (!success) throw new Error('Group not found');
+                return;
+            }
+            case '/reserved-names': {
+                const success = mockDb.deleteReservedName(id);
+                if (!success) throw new Error('ReservedName not found');
                 return;
             }
             case '/data-types': {

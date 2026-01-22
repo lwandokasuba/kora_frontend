@@ -2,8 +2,8 @@
 import {
     Group, Field, Service, Form, FormField, Submission, FormAnswer,
     CreateGroup, CreateField, CreateService, CreateForm, CreateFormField, CreateSubmission, CreateFormAnswer,
-    DataType, Collection, CollectionItem, User,
-    CreateDataType, CreateCollection, CreateCollectionItem, CreateUser
+    DataType, Collection, CollectionItem, User, ReservedName,
+    CreateDataType, CreateCollection, CreateCollectionItem, CreateUser, CreateReservedName
 } from '../types';
 
 // In-memory mock database
@@ -19,6 +19,7 @@ class MockDatabase {
     private formAnswers: FormAnswer[] = [];
     private collections: Collection[] = [];
     private collectionItems: CollectionItem[] = [];
+    private reservedNames: ReservedName[] = [];
 
     private idCounters = {
         groups: 1,
@@ -31,7 +32,8 @@ class MockDatabase {
         submissions: 1,
         formAnswers: 1,
         collections: 1,
-        collectionItems: 1
+        collectionItems: 1,
+        reservedNames: 1
     };
 
     // Initialize with mock data
@@ -42,6 +44,11 @@ class MockDatabase {
             { id: 1, group_name: 'Person' },
             { id: 2, group_name: 'Address' },
             { id: 3, group_name: 'Entity' }
+        ];
+
+        this.reservedNames = [
+            { id: 1, reserved_name: 'PACRA' },
+            { id: 2, reserved_name: 'Patents and Companies Registration Agency' }
         ];
 
         this.dataTypes = [
@@ -215,6 +222,7 @@ class MockDatabase {
         this.idCounters.formAnswers = Math.max(...this.formAnswers.map(fa => fa.id), 0) + 1;
         this.idCounters.collections = Math.max(...this.collections.map(c => c.id), 0) + 1;
         this.idCounters.collectionItems = Math.max(...this.collectionItems.map(ci => ci.id), 0) + 1;
+        this.idCounters.reservedNames = Math.max(...this.reservedNames.map(rn => rn.id), 0) + 1;
 
         console.log('✅ Mock database initialized with sample data');
     }
@@ -246,6 +254,13 @@ class MockDatabase {
     createGroup(data: CreateGroup) { return this.createLocal(this.groups, data, this.idCounters.groups++); }
     updateGroup(id: number, data: Partial<Group>) { return this.updateLocal(this.groups, id, data); }
     deleteGroup(id: number) { return this.deleteLocal(this.groups, id); }
+
+    // ReservedNames
+    getReservedNames() { return this.getLocal(this.reservedNames); }
+    getReservedName(id: number) { return this.getLocalById(this.reservedNames, id); }
+    createReservedName(data: CreateReservedName) { return this.createLocal(this.reservedNames, data, this.idCounters.reservedNames++); }
+    updateReservedName(id: number, data: Partial<ReservedName>) { return this.updateLocal(this.reservedNames, id, data); }
+    deleteReservedName(id: number) { return this.deleteLocal(this.reservedNames, id); }
 
     // DataTypes
     getDataTypes() { return this.getLocal(this.dataTypes); }

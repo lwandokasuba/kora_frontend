@@ -194,3 +194,9 @@ export type UpdateCollection = z.infer<typeof UpdateCollectionSchema>;
 
 export const UpdateCollectionItemSchema = CollectionItemSchema.partial().extend({ id: z.number().int() });
 export type UpdateCollectionItem = z.infer<typeof UpdateCollectionItemSchema>;
+
+export const CreateReservedNameSchema = ReservedNameSchema.omit({ id: true });
+export type CreateReservedName = z.infer<typeof CreateReservedNameSchema>;
+
+export const UpdateReservedNameSchema = ReservedNameSchema.partial().extend({ id: z.number().int() });
+export type UpdateReservedName = z.infer<typeof UpdateReservedNameSchema>;
