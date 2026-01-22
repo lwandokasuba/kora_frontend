@@ -4,18 +4,18 @@ import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import {
-    DndContext,
-    DragOverlay,
-    useSensor,
-    useSensors,
-    PointerSensor,
-    DragStartEvent,
-    DragEndEvent,
-    DragOverEvent,
-    UniqueIdentifier,
-    useDroppable,
-    pointerWithin
-} from '@dnd-kit/core'
+  DndContext,
+  DragOverlay,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  DragStartEvent,
+  DragEndEvent,
+  DragOverEvent,
+  UniqueIdentifier,
+  useDroppable,
+  pointerWithin,
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
@@ -167,42 +167,42 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     setActiveId(null);
     setActiveDragType(null);
 
-        // If no valid drop target, cancel the drag
-        if (!over) {
-            return;
-        }
+    // If no valid drop target, cancel the drag
+    if (!over) {
+      return;
+    }
 
-        // Dropping a toolbox item
-        if (active.data.current?.isToolboxItem) {
-            const type = active.data.current.type as FieldType;
-            
-            // STRICT: Only create field if dropping EXACTLY on canvas-droppable or an existing field
-            // Reject all other drop targets (like the outer canvas area, toolbox, etc.)
-            if (over.id === 'canvas-droppable') {
-                // Dropped directly on the form container
-                createNewField(type);
-            } else {
-                // Check if dropping on an existing field
-                const overFieldId = over.id as string;
-                const overField = fields.find(f => f.id === overFieldId);
-                if (overField) {
-                    // Dropped on an existing field - insert after it
-                    createNewField(type, overFieldId);
-                }
-                // If neither canvas-droppable nor a field, do nothing (cancel)
-            }
-            return;
-        }
+    // Dropping a toolbox item
+    if (active.data.current?.isToolboxItem) {
+      const type = active.data.current.type as FieldType;
 
-        // Reordering existing fields
-        // Only reorder if both active and over are existing fields
-        const activeField = fields.find(f => f.id === active.id);
-        const overField = fields.find(f => f.id === over.id);
-        
-        if (activeField && overField && active.id !== over.id) {
-            setFields((items) => {
-                const oldIndex = items.findIndex((item) => item.id === active.id);
-                const newIndex = items.findIndex((item) => item.id === over.id);
+      // STRICT: Only create field if dropping EXACTLY on canvas-droppable or an existing field
+      // Reject all other drop targets (like the outer canvas area, toolbox, etc.)
+      if (over.id === "canvas-droppable") {
+        // Dropped directly on the form container
+        createNewField(type);
+      } else {
+        // Check if dropping on an existing field
+        const overFieldId = over.id as string;
+        const overField = fields.find((f) => f.id === overFieldId);
+        if (overField) {
+          // Dropped on an existing field - insert after it
+          createNewField(type, overFieldId);
+        }
+        // If neither canvas-droppable nor a field, do nothing (cancel)
+      }
+      return;
+    }
+
+    // Reordering existing fields
+    // Only reorder if both active and over are existing fields
+    const activeField = fields.find((f) => f.id === active.id);
+    const overField = fields.find((f) => f.id === over.id);
+
+    if (activeField && overField && active.id !== over.id) {
+      setFields((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
 
         if (oldIndex !== -1 && newIndex !== -1) {
           return arrayMove(items, oldIndex, newIndex);
@@ -221,24 +221,24 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
 
     if (activeId === overId) return;
 
-        // Only handle reordering of existing fields, not toolbox items
-        const isActiveAField = !active.data.current?.isToolboxItem;
-        const isOverAField = fields.find(f => f.id === overId) !== undefined;
+    // Only handle reordering of existing fields, not toolbox items
+    const isActiveAField = !active.data.current?.isToolboxItem;
+    const isOverAField = fields.find((f) => f.id === overId) !== undefined;
 
-        // Only reorder if both are existing fields (not toolbox items)
-        if (isActiveAField && isOverAField) {
-            setFields((items) => {
-                const oldIndex = items.findIndex((item) => item.id === activeId);
-                const newIndex = items.findIndex((item) => item.id === overId);
+    // Only reorder if both are existing fields (not toolbox items)
+    if (isActiveAField && isOverAField) {
+      setFields((items) => {
+        const oldIndex = items.findIndex((item) => item.id === activeId);
+        const newIndex = items.findIndex((item) => item.id === overId);
 
-                if (oldIndex !== -1 && newIndex !== -1) {
-                    return arrayMove(items, oldIndex, newIndex);
-                }
-                return items;
-            });
+        if (oldIndex !== -1 && newIndex !== -1) {
+          return arrayMove(items, oldIndex, newIndex);
         }
-        // Do nothing for toolbox items during drag over - only handle on drag end
-    };
+        return items;
+      });
+    }
+    // Do nothing for toolbox items during drag over - only handle on drag end
+  };
 
   const handleFieldSelect = (id: string) => {
     setSelectedFieldId(id);
@@ -336,7 +336,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
 
   if (!isMounted) {
     return (
-      <div className="flex flex-col h-screen bg-background">
+      <div className="flex flex-col h-full w-full">
         <div className="flex items-center justify-center flex-1">
           <div className="text-muted-foreground">Loading form builder...</div>
         </div>
@@ -344,319 +344,163 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     );
   }
 
-    return (
-        <DndContext
-            sensors={sensors}
-            collisionDetection={pointerWithin}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragOver={handleDragOver}
-        >
-            <div className="flex flex-col h-screen bg-background">
-                <Toaster />
-                <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-3 md:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 shadow-sm">
-                    <div className="flex items-center gap-2 md:gap-4 w-full sm:w-auto">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => router.push('/')}
-                            className="h-8 w-8 md:h-9 md:w-9 flex-shrink-0"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="bg-primary/10 p-1.5 md:p-2 rounded-lg flex-shrink-0">
-                                <span className="text-lg md:text-xl font-bold text-primary">S</span>
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <h1 className="text-xs md:text-sm font-semibold truncate">Service Configuration</h1>
-                                <span className="text-xs text-muted-foreground truncate">{formName}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex-shrink-0 w-full sm:w-auto">
-                        <Button onClick={handleSave} className="gap-2 w-full sm:w-auto">
-                            <Save className="h-4 w-4" />
-                            <span className="text-sm md:text-base">Save Form</span>
-                        </Button>
-                    </div>
-                </header>
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={pointerWithin}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
+    >
+      <div className="flex h-full w-full">
+        <Toaster />
 
-                <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-                    {/* Toolbox Sidebar */}
-                    <aside className="w-full md:w-64 border-r bg-background p-4 overflow-y-auto hidden md:block shrink-0 min-w-[16rem] max-w-[16rem]">
-                        <h2 className="font-semibold mb-4 text-sm uppercase text-muted-foreground">Toolbox</h2>
-                        <div className="space-y-3">
-                            {FIELD_TYPES.map((type) => (
-                                <ToolboxItem 
-                                    key={type.type} 
-                                    type={type.type} 
-                                    label={type.label}
-                                    onClick={() => createNewField(type.type)}
-                                />
-                            ))}
-                        </div>
-
-            <div className="mt-8 p-4 bg-muted/20 rounded-lg border border-dashed">
-              <p className="text-xs text-muted-foreground text-center">
-                Click or drag fields to add them to your form.
-              </p>
-            </div>
-
-            <div className="flex-shrink-0 w-full sm:w-auto">
-              <Button onClick={handleSave} className="gap-2 w-full sm:w-auto">
-                <Save className="h-4 w-4" />
-                <span className="text-sm md:text-base">Save Form</span>
-              </Button>
-            </div>
-          </aside>
-
-          {/* Mobile Toolbox Dropdown */}
-          <div className="md:hidden p-4 z-40">
-            {showMobileToolbox && (
-              <div className="absolute bottom-16 right-0 mb-2 w-48 bg-card border rounded-lg shadow-lg p-2 space-y-2">
-                {FIELD_TYPES.map((type) => (
-                  <button
-                    key={type.type}
-                    onClick={() => {
-                      createNewField(type.type);
-                      setShowMobileToolbox(false);
-                    }}
-                    className="w-full flex items-center gap-2 p-3 border rounded-md bg-background hover:bg-accent hover:border-primary transition-colors text-sm font-medium text-left"
-                  >
-                    <span>{type.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-            <Button
-              onClick={() => setShowMobileToolbox(!showMobileToolbox)}
-              size="lg"
-              className="rounded-full shadow-lg h-14 w-14"
-            >
-              {showMobileToolbox ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Plus className="h-5 w-5" />
-              )}
-            </Button>
+        <aside className="w-64 border-r p-6 overflow-y-auto flex-shrink-0">
+          <h2 className="font-bold mb-6 text-lg">Tool Box</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {FIELD_TYPES.map((type) => (
+              <ToolboxItem
+                key={type.type}
+                type={type.type}
+                label={type.label}
+                onClick={() => createNewField(type.type)}
+              />
+            ))}
           </div>
+        </aside>
 
-                    {/* Canvas Area */}
-                    <div
-                        className="flex-1 p-4 md:p-8 overflow-y-auto bg-muted/10 relative"
-                        onClick={() => {
-                            setSelectedFieldId(null);
-                            setShowMobileToolbox(false);
+        <div
+          className="flex-1 p-8 overflow-y-auto bg-white dark:bg-stone-900 relative"
+          onClick={() => setSelectedFieldId(null)}
+        >
+          <CanvasDropZone isEmpty={fields.length === 0}>
+            <div className="w-full mx-auto h-full border shadow-sm rounded-lg p-12 transition-colors relative">
+              <div className="mb-8 pb-6 text-center space-y-2">
+                <div
+                  className="group relative"
+                  onMouseEnter={() => setIsHoveringName(true)}
+                  onMouseLeave={() => setIsHoveringName(false)}
+                >
+                  {isEditingName ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Input
+                        ref={nameInputRef}
+                        value={formName}
+                        onChange={(e) => setFormName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleNameSave();
+                          } else if (e.key === "Escape") {
+                            handleNameCancel();
+                          }
                         }}
-                    >
-                        <div className="max-w-3xl mx-auto">
-                            <CanvasDropZone isEmpty={fields.length === 0}>
-                                <div
-                                    className="bg-background min-h-[600px] md:min-h-[900px] border shadow-sm rounded-lg p-4 md:p-12 transition-colors relative"
-                                >
-                                {/* Form Header Preview - Editable */}
-                                <div className="mb-4 md:mb-8 pb-4 md:pb-6 border-b space-y-2">
-                                    {/* Editable Title */}
-                                    <div
-                                        className="group relative"
-                                        onMouseEnter={() => setIsHoveringName(true)}
-                                        onMouseLeave={() => setIsHoveringName(false)}
-                                    >
-                                        {isEditingName ? (
-                                            <div className="flex items-center gap-2">
-                                                <Input
-                                                    ref={nameInputRef}
-                                                    value={formName}
-                                                    onChange={(e) => setFormName(e.target.value)}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === 'Enter') {
-                                                            handleNameSave();
-                                                        } else if (e.key === 'Escape') {
-                                                            handleNameCancel();
-                                                        }
-                                                    }}
-                                                    className="text-xl md:text-3xl font-bold h-auto py-2 border-primary focus-visible:ring-2"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                                <div className="flex items-center gap-1">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={handleNameSave}
-                                                    >
-                                                        <Check className="h-4 w-4 text-green-600" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8"
-                                                        onClick={handleNameCancel}
-                                                    >
-                                                        <X className="h-4 w-4 text-red-600" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center gap-2 group/title">
-                                                <h2 className="text-xl md:text-3xl font-bold text-slate-800 dark:text-slate-200">
-                                                    {formName}
-                                                </h2>
-                                                {isHoveringName && (
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-6 w-6 opacity-70 hover:opacity-100"
-                                                        onClick={handleNameEdit}
-                                                    >
-                                                        <Pencil className="h-4 w-4" />
-                                                    </Button>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
+                        className="text-center text-sm font-semibold h-auto py-2 border-primary focus-visible:ring-2"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={handleNameSave}
+                        >
+                          <Check className="h-4 w-4 text-green-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={handleNameCancel}
+                        >
+                          <X className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 group/title">
+                      <h2 className="text-sm font-semibold uppercase tracking-wide">
+                        {formName}
+                      </h2>
+                      {isHoveringName && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 opacity-70 hover:opacity-100"
+                          onClick={handleNameEdit}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-                  {/* Editable Description */}
-                  <div
-                    className="group relative"
-                    onMouseEnter={() => setIsHoveringDescription(true)}
-                    onMouseLeave={() => setIsHoveringDescription(false)}
-                  >
-                    {isEditingDescription ? (
-                      <div className="flex items-start gap-2">
-                        <Input
-                          ref={descriptionInputRef}
-                          value={formDescription}
-                          onChange={(e) => setFormDescription(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && !e.shiftKey) {
-                              e.preventDefault();
-                              handleDescriptionSave();
-                            } else if (e.key === "Escape") {
-                              handleDescriptionCancel();
-                            }
-                          }}
-                          placeholder="Please fill out the details below."
-                          className="text-slate-500 dark:text-slate-400 text-sm md:text-base h-auto py-2 border-primary focus-visible:ring-2"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <div className="flex items-center gap-1 pt-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={handleDescriptionSave}
-                          >
-                            <Check className="h-4 w-4 text-green-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={handleDescriptionCancel}
-                          >
-                            <X className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 group/description">
-                        <p className="text-slate-500 dark:text-slate-400 mt-1 md:mt-2 text-sm md:text-base">
-                          {formDescription ||
-                            "Please fill out the details below."}
-                        </p>
-                        {isHoveringDescription && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 opacity-70 hover:opacity-100"
-                            onClick={handleDescriptionEdit}
-                          >
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    )}
+              <SortableContext
+                items={fields.map((f) => f.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="min-h-[200px]">
+                  <div className="space-y-4">
+                    {fields.map((field) => (
+                      <SortableField
+                        key={field.id}
+                        field={field}
+                        isSelected={selectedFieldId === field.id}
+                        onSelect={(id) => {
+                          setTimeout(() => handleFieldSelect(id), 0);
+                        }}
+                        onDelete={handleFieldDelete}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="mt-8 flex justify-center">
+                    <Button
+                      onClick={() => createNewField("text")}
+                      className="bg-[#D4B896] hover:bg-[#C4A886] text-foreground px-8"
+                    >
+                      Add New Field
+                    </Button>
                   </div>
                 </div>
-
-                <SortableContext
-                  items={fields.map((f) => f.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  <div className="min-h-[200px]">
-                    {fields.length === 0 && !activeDragType && (
-                      <div className="text-center text-muted-foreground py-20 border-2 border-dashed rounded-lg bg-muted/30">
-                        <p className="font-medium">Form is empty</p>
-                        <p className="text-sm mt-1">
-                          Click or drag fields from the toolbox to start
-                          building.
-                        </p>
-                      </div>
-                    )}
-
-                                    {/* Grid layout for fields */}
-                                    <div className="grid grid-cols-12 gap-4">
-                                        {fields.map((field) => {
-                                            const columnSpan = field.columnSpan || 12;
-                                            // Map column spans to Tailwind classes
-                                            const colSpanClass = {
-                                                12: 'col-span-12',
-                                                6: 'col-span-12 md:col-span-6',
-                                                4: 'col-span-12 md:col-span-4',
-                                                3: 'col-span-12 md:col-span-3',
-                                            }[columnSpan] || 'col-span-12';
-                                            
-                                            return (
-                                                <div
-                                                    key={field.id}
-                                                    className={colSpanClass}
-                                                >
-                                        <SortableField
-                                            field={field}
-                                            isSelected={selectedFieldId === field.id}
-                                            onSelect={(id) => {
-                                                setTimeout(() => handleFieldSelect(id), 0);
-                                            }}
-                                            onDelete={handleFieldDelete}
-                                        />
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            </SortableContext>
-                                </div>
-                            </CanvasDropZone>
-                        </div>
-                    </div>
-
-          {/* Properties Sidebar */}
-          <PropertiesPanel
-            field={selectedField}
-            onChange={handleFieldUpdate}
-            onDelete={handleFieldDelete}
-          />
+              </SortableContext>
+            </div>
+          </CanvasDropZone>
         </div>
 
-        <DragOverlay>
-          {activeId ? (
-            activeDragType ? (
-              <ToolboxItemOverlay
-                label={
-                  FIELD_TYPES.find((t) => t.type === activeDragType)?.label ||
-                  "Field"
-                }
-              />
-            ) : (
-              <div className="opacity-80 p-4 bg-background border rounded shadow-lg w-[400px]">
-                Moving Field...
-              </div>
-            )
-          ) : null}
-        </DragOverlay>
+        <aside className="w-80 border-l p-6 overflow-y-auto flex-shrink-0">
+          <h2 className="font-bold mb-6 text-lg">Properties & Styling</h2>
+          {selectedField ? (
+            <PropertiesPanel
+              field={selectedField}
+              onChange={handleFieldUpdate}
+              onDelete={handleFieldDelete}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Select a field to edit its properties
+            </p>
+          )}
+        </aside>
       </div>
+
+      <DragOverlay>
+        {activeId ? (
+          activeDragType ? (
+            <ToolboxItemOverlay
+              label={
+                FIELD_TYPES.find((t) => t.type === activeDragType)?.label ||
+                "Field"
+              }
+            />
+          ) : (
+            <div className="opacity-80 p-4 bg-background border rounded shadow-lg w-[400px]">
+              Moving Field...
+            </div>
+          )
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }
