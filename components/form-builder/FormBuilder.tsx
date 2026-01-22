@@ -36,8 +36,19 @@ import {
   X,
   Plus,
   Search,
+  Loader2,
 } from "lucide-react";
 import { Toaster, toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   selectCurrentForm,
   selectAllForms,
@@ -45,7 +56,7 @@ import {
   updateForm,
   setCurrentForm,
 } from "@/lib/features/formBuilder/formSlice";
-import { useFields } from "@/hooks/Fields";
+import { useFields, useCreateField } from "@/hooks/Fields";
 
 interface FormBuilderProps {
   formId?: string;
@@ -85,7 +96,38 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [activeDragType, setActiveDragType] = useState<FieldType | null>(null);
   const [showMobileToolbox, setShowMobileToolbox] = useState(false);
+
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Field creation state
+  const [isCreatingField, setIsCreatingField] = useState(false);
+  const [newFieldLabel, setNewFieldLabel] = useState("");
+  const [newFieldDataType, setNewFieldDataType] = useState<string>("text");
+  
+  const createFieldMutation = useCreateField();
+
+  const handleCreateField = async () => {
+    if (!newFieldLabel.trim()) {
+      toast.error("Please enter a field label");
+      return;
+    }
+
+    try {
+      await createFieldMutation.mutateAsync({
+        label: newFieldLabel.trim(),
+        data_type: newFieldDataType,
+        group_id: null,
+      });
+      
+      toast.success("Field created successfully");
+      setIsCreatingField(false);
+      setNewFieldLabel("");
+      setNewFieldDataType("text");
+    } catch (error) {
+      console.error("Failed to create field:", error);
+      toast.error("Failed to create field");
+    }
+  };
 
   const filteredFieldTypes = useMemo(() => {
     if (!searchQuery.trim()) return availableFieldTypes;
@@ -405,6 +447,70 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
                 />
               </div>
             </div>
+
+            <div className="mb-4">
+              <Dialog open={isCreatingField} onOpenChange={setIsCreatingField}>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="w-full bg-[#B4813F] hover:bg-[#9A6E35] text-white"
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Field
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Field</DialogTitle>
+                    <DialogDescription>
+                      Add a new field type to your collection.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="label">Label</Label>
+                      <Input
+                        id="label"
+                        placeholder="e.g., Email Address"
+                        value={newFieldLabel}
+                        onChange={(e) => setNewFieldLabel(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="dataType">Data Type</Label>
+                      <select
+                        id="dataType"
+                        value={newFieldDataType}
+                        onChange={(e) => setNewFieldDataType(e.target.value)}
+                        className="flex h-10 w-full items-center justify-between rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-800 dark:bg-stone-950 dark:ring-offset-stone-950 dark:placeholder:text-stone-400 dark:focus:ring-stone-300"
+                      >
+                        <option value="text">Text</option>
+                        <option value="number">Number</option>
+                        <option value="date">Date</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="select">Dropdown</option>
+                      </select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsCreatingField(false)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleCreateField}
+                      disabled={createFieldMutation.isPending}
+                      className="bg-[#B4813F] hover:bg-[#9A6E35] text-white"
+                    >
+                      {createFieldMutation.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Create Field
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
             <div className="space-y-2">
               {filteredFieldTypes.length === 0 ? (
                 <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
