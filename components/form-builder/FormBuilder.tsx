@@ -22,7 +22,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { nanoid } from "nanoid";
-import { FormField, FIELD_TYPES, FieldType, transformFieldsToToolboxItems } from "./types";
+import { FormField, FIELD_TYPES, FieldType, transformFieldsToToolboxItems, DATA_TYPE_TO_FIELD_TYPE } from "./types";
 import { ToolboxItem, ToolboxItemOverlay } from "./ToolboxItem";
 import { SortableField } from "./SortableField";
 import PropertiesPanel from "./PropertiesPanel";
@@ -56,7 +56,7 @@ import {
   updateForm,
   setCurrentForm,
 } from "@/lib/features/formBuilder/formSlice";
-import { useFields, useCreateField } from "@/hooks/Fields";
+import { useFields, useCreateField, useGroups } from "@/hooks";
 
 interface FormBuilderProps {
   formId?: string;
@@ -68,12 +68,12 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const existingForm = useAppSelector(selectCurrentForm);
   const allForms = useAppSelector(selectAllForms);
 
-  // Fetch available field types from database
   const { data: dbFields, isLoading: isLoadingFields, error: fieldsError } = useFields();
+  const { data: dbGroups, isLoading: isLoadingGroups } = useGroups();
 
   // Transform database fields to toolbox items, with fallback to hardcoded types
   const availableFieldTypes = useMemo(() => {
-    let items: { type: FieldType; label: string; id?: string }[] = [];
+    let items: { type: FieldType; label: string; id?: string; groupId?: string }[] = [];
     
     if (dbFields && dbFields.length > 0) {
       items = transformFieldsToToolboxItems(dbFields);
@@ -85,13 +85,35 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     }
     
     // Always ensure Group is present if it's not in the list
-    // (structural elements like Group are usually not in the DB field definitions)
-    if (!items.some(item => item.type === 'group')) {
+    // This allows creating an empty ad-hoc group
+    if (!items.some(item => item.type === 'group' && !item.id)) {
         items.push({ type: 'group', label: 'Group' });
     }
     
     return items;
   }, [dbFields]);
+
+  // Separate fields into groups and individual fields
+  // "Groups" here refers to pre-defined groups from the DB + the generic Group tool
+  const toolboxGroups = useMemo(() => {
+      const groups: { type: FieldType; label: string; id?: string; isGroupEntity?: boolean }[] = [];
+      
+      // Add the generic Group tool
+      groups.push({ type: 'group', label: 'Empty Group' });
+
+      // Add pre-defined groups from DB
+      if (dbGroups) {
+          dbGroups.forEach(g => {
+              groups.push({
+                  type: 'group',
+                  label: g.group_name,
+                  id: g.id.toString(),
+                  isGroupEntity: true
+              });
+          });
+      }
+      return groups;
+  }, [dbGroups]);
 
   /* -------------------------------------------------------------------------- */
   /*                             Recursive Helpers                              */
@@ -298,8 +320,28 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     }
   };
 
-  const createNewField = (template: { type: FieldType; label?: string }, targetId?: string, position?: 'after' | 'inside') => {
+  const createNewField = (template: { type: FieldType; label?: string; id?: string; isGroupEntity?: boolean }, targetId?: string, position?: 'after' | 'inside') => {
     const type = template.type;
+    
+    // If it's a pre-defined group, we need to populate children
+    let children: FormField[] = [];
+    if (template.isGroupEntity && template.id && dbFields) {
+        const groupId = template.id;
+        // Find fields belonging to this group
+        const groupFields = dbFields.filter(f => f.group_id?.toString() === groupId);
+        
+        children = groupFields.map(gf => ({
+            id: nanoid(),
+            type: DATA_TYPE_TO_FIELD_TYPE[gf.data_type.toLowerCase()] || 'text',
+            label: gf.label,
+            required: false,
+            placeholder: "",
+            columnSpan: 12
+        }));
+    } else if (type === 'group') {
+        children = [];
+    }
+
     const newField: FormField = {
       id: nanoid(),
       type,
@@ -315,7 +357,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
               ? "Select date"
               : "",
       columnSpan: 12, // Default full width
-      children: type === 'group' ? [] : undefined,
+      children: type === 'group' ? children : undefined,
     };
 
     if (targetId) {
@@ -717,22 +759,40 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
               </Dialog>
             </div>
 
-            <div className="space-y-2">
-              {filteredFieldTypes.length === 0 ? (
-                <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
-                  No fields found
-                </div>
-              ) : (
-                filteredFieldTypes.map((type) => (
-                  <ToolboxItem
-                    key={type.id || type.type}
-                    type={type.type}
-                    label={type.label}
-                    id={type.id}
-                    onClick={() => createNewField({ type: type.type, label: type.label })}
-                  />
-                ))
-              )}
+            <div className="space-y-6">
+              {/* Groups Section */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Groups</h3>
+                {toolboxGroups.map((group) => (
+                   <ToolboxItem
+                     key={group.id ? `group-${group.id}` : 'group-generic'}
+                     type="group"
+                     label={group.label}
+                     id={group.id}
+                     onClick={() => createNewField({ type: 'group', label: group.label, id: group.id, isGroupEntity: group.isGroupEntity })}
+                   />
+                ))}
+              </div>
+
+              {/* Individual Fields Section */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Fields</h3>
+                {filteredFieldTypes.length === 0 ? (
+                    <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+                    No fields found
+                    </div>
+                ) : (
+                    filteredFieldTypes.filter(t => t.type !== 'group').map((type) => (
+                    <ToolboxItem
+                        key={type.id || type.type}
+                        type={type.type}
+                        label={type.label}
+                        id={type.id}
+                        onClick={() => createNewField({ type: type.type, label: type.label })}
+                    />
+                    ))
+                )}
+              </div>
             </div>
 
             <div className="mt-6 p-4 bg-[#FEF3E2] dark:bg-[#FEF3E2]/20 rounded-lg border border-stone-200 dark:border-stone-700">
@@ -747,9 +807,27 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
             {showMobileToolbox && (
               <div className="absolute bottom-16 right-0 mb-2 w-56 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg shadow-xl p-3 space-y-2 max-h-[400px] overflow-y-auto">
                 <div className="mb-2 pb-2 border-b border-stone-200 dark:border-stone-700">
-                  <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase">Add Field</p>
+                  <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 uppercase">Add Element</p>
                 </div>
-                {availableFieldTypes.map((type) => (
+                
+                {/* Mobile Groups */}
+                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Groups</p>
+                {toolboxGroups.map((group) => (
+                  <button
+                    key={group.id ? `group-${group.id}` : 'group-generic'}
+                    onClick={() => {
+                      createNewField({ type: 'group', label: group.label, id: group.id, isGroupEntity: group.isGroupEntity });
+                      setShowMobileToolbox(false);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 border border-stone-200 dark:border-stone-700 rounded-md bg-white dark:bg-stone-800 hover:bg-[#FEF3E2] dark:hover:bg-[#FEF3E2]/20 hover:border-[#B4813F] transition-colors text-sm font-medium text-left text-gray-900 dark:text-gray-100"
+                  >
+                     <span>{group.label}</span>
+                  </button>
+                ))}
+
+                {/* Mobile Fields */}
+                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mt-3 mb-1">Fields</p>
+                {availableFieldTypes.filter(t => t.type !== 'group').map((type) => (
                   <button
                     key={type.id || type.type}
                     onClick={() => {

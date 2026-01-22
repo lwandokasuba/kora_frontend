@@ -25,7 +25,7 @@ export const FIELD_TYPES: { type: FieldType; label: string; icon?: React.ReactNo
 /**
  * Maps database data_type to component FieldType
  */
-const DATA_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
+export const DATA_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
     'text': 'text',
     'string': 'text',
     'varchar': 'text',
@@ -49,7 +49,7 @@ const DATA_TYPE_TO_FIELD_TYPE: Record<string, FieldType> = {
  * Transforms a database Field to the toolbox item format
  * Returns null if the field type is not supported
  */
-export function transformFieldToToolboxItem(field: Field): { type: FieldType; label: string; id?: string } | null {
+export function transformFieldToToolboxItem(field: Field): { type: FieldType; label: string; id?: string; groupId?: string } | null {
     const fieldType = DATA_TYPE_TO_FIELD_TYPE[field.data_type.toLowerCase()];
     
     if (!fieldType) {
@@ -61,6 +61,7 @@ export function transformFieldToToolboxItem(field: Field): { type: FieldType; la
         type: fieldType,
         label: field.label,
         id: field.id.toString(), // Include the original database field ID
+        groupId: field.group_id?.toString(),
     };
 }
 
@@ -68,8 +69,8 @@ export function transformFieldToToolboxItem(field: Field): { type: FieldType; la
  * Transforms an array of database Fields to toolbox items
  * Returns all valid fields without deduplication, so specific fields (e.g., "First Name", "Last Name") are available.
  */
-export function transformFieldsToToolboxItems(fields: Field[]): { type: FieldType; label: string; id?: string }[] {
+export function transformFieldsToToolboxItems(fields: Field[]): { type: FieldType; label: string; id?: string; groupId?: string }[] {
     return fields
         .map(transformFieldToToolboxItem)
-        .filter((item): item is { type: FieldType; label: string; id?: string } => item !== null);
+        .filter((item): item is { type: FieldType; label: string; id?: string; groupId?: string } => item !== null);
 }
