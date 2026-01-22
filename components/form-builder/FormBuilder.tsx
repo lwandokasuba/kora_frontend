@@ -363,7 +363,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
 
                 <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
                     {/* Toolbox Sidebar */}
-                    <aside className="w-full md:w-64 border-r bg-background p-4 overflow-y-auto hidden md:block md:flex-shrink-0">
+                    <aside className="w-full md:w-64 border-r bg-background p-4 overflow-y-auto hidden md:block shrink-0 min-w-[16rem] max-w-[16rem]">
                         <h2 className="font-semibold mb-4 text-sm uppercase text-muted-foreground">Toolbox</h2>
                         <div className="space-y-3">
                             {FIELD_TYPES.map((type) => (
