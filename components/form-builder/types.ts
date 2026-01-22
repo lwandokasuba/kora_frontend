@@ -1,6 +1,6 @@
 import { Field } from '@/types';
 
-export type FieldType = 'text' | 'number' | 'date' | 'checkbox' | 'select';
+export type FieldType = 'text' | 'number' | 'date' | 'checkbox' | 'select' | 'group';
 
 export interface FormField {
     id: string;
@@ -10,6 +10,7 @@ export interface FormField {
     placeholder?: string;
     options?: string[]; // For select type
     columnSpan?: number; // 1-12 for grid layout (default: 12 = full width)
+    children?: FormField[]; // For group type
 }
 
 export const FIELD_TYPES: { type: FieldType; label: string; icon?: React.ReactNode }[] = [
@@ -18,6 +19,7 @@ export const FIELD_TYPES: { type: FieldType; label: string; icon?: React.ReactNo
     { type: 'date', label: 'Date' },
     { type: 'checkbox', label: 'Checkbox' },
     { type: 'select', label: 'Dropdown' },
+    { type: 'group', label: 'Group' },
 ];
 
 /**

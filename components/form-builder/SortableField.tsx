@@ -1,21 +1,20 @@
-
-'use client'
-
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import { FormField } from './types';
 import { GripVertical, Trash2 } from 'lucide-react';
+import { GroupContainer } from './GroupContainer';
 
 interface SortableFieldProps {
     field: FormField;
     isSelected: boolean;
+    selectedFieldId?: string | null;
     onSelect: (id: string) => void;
     onDelete: (id: string, e: React.MouseEvent) => void;
 }
 
-export function SortableField({ field, isSelected, onSelect, onDelete }: SortableFieldProps) {
+export function SortableField({ field, isSelected, selectedFieldId, onSelect, onDelete }: SortableFieldProps) {
     const {
         attributes,
         listeners,
@@ -34,7 +33,10 @@ export function SortableField({ field, isSelected, onSelect, onDelete }: Sortabl
         <div
             ref={setNodeRef}
             style={style}
-            onClick={() => onSelect(field.id)}
+            onClick={(e) => {
+                e.stopPropagation(); // Prevent selecting parent group when clicking child
+                onSelect(field.id);
+            }}
             className={cn(
                 "relative group flex items-start gap-3 p-4 border rounded-lg bg-white dark:bg-stone-800 cursor-pointer transition-all w-full",
                 isSelected ? "ring-2 ring-[#B4813F] border-[#B4813F]" : "border-stone-200 dark:border-stone-700 hover:border-[#B4813F]/50",
@@ -53,38 +55,48 @@ export function SortableField({ field, isSelected, onSelect, onDelete }: Sortabl
                 <div className="group-hover:hidden h-4 w-4" /> {/* Spacer */}
             </div>
 
-            <div className="flex-1 space-y-2 pointer-events-none">
+            <div className="flex-1 space-y-2">
                 <label className="text-sm font-medium leading-none text-gray-900 dark:text-gray-100 peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     {field.label} {field.required && <span className="text-red-600 dark:text-red-400">*</span>}
                 </label>
 
                 {/* Render dummy input based on type */}
-                <div className="pointer-events-none">
+                <div className="">
                     {field.type === 'text' && (
-                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 pointer-events-none">
                             {field.placeholder || "Text input"}
                         </div>
                     )}
                     {field.type === 'number' && (
-                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 pointer-events-none">
                             0
                         </div>
                     )}
                     {field.type === 'date' && (
-                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 pointer-events-none">
                             Pick a date
                         </div>
                     )}
                     {field.type === 'checkbox' && (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 pointer-events-none">
                             <div className="h-4 w-4 rounded border border-[#B4813F]" style={{ borderColor: '#B4813F' }} />
                             <span className="text-sm font-medium text-gray-900 dark:text-gray-100">Checkbox option</span>
                         </div>
                     )}
                     {field.type === 'select' && (
-                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between">
+                        <div className="h-10 w-full rounded-md border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-900 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 flex items-center justify-between pointer-events-none">
                             <span>Select an option</span>
                             <span className="h-4 w-4 opacity-50">▼</span>
+                        </div>
+                    )}
+                    {field.type === 'group' && (
+                        <div className="w-full">
+                            <GroupContainer 
+                                field={field}
+                                selectedFieldId={selectedFieldId || null}
+                                onSelect={onSelect}
+                                onDelete={onDelete}
+                            />
                         </div>
                     )}
                 </div>

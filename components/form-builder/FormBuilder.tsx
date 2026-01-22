@@ -73,15 +73,98 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
 
   // Transform database fields to toolbox items, with fallback to hardcoded types
   const availableFieldTypes = useMemo(() => {
+    let items: { type: FieldType; label: string }[] = [];
+    
     if (dbFields && dbFields.length > 0) {
-      const transformed = transformFieldsToToolboxItems(dbFields);
-      // If no fields could be transformed, fall back to default types
-      return transformed.length > 0 ? transformed : FIELD_TYPES;
+      items = transformFieldsToToolboxItems(dbFields);
     }
-    // Fallback to hardcoded types while loading or if error
-    return FIELD_TYPES;
+    
+    // If no fields could be transformed or DB is empty, use default types
+    if (items.length === 0) {
+        items = [...FIELD_TYPES];
+    }
+    
+    // Always ensure Group is present if it's not in the list
+    // (structural elements like Group are usually not in the DB field definitions)
+    if (!items.some(item => item.type === 'group')) {
+        items.push({ type: 'group', label: 'Group' });
+    }
+    
+    return items;
   }, [dbFields]);
 
+  /* -------------------------------------------------------------------------- */
+  /*                             Recursive Helpers                              */
+  /* -------------------------------------------------------------------------- */
+  
+  const findFieldAndParent = (
+    items: FormField[],
+    id: string
+  ): { field: FormField | null; parent: FormField | null; index: number } => {
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].id === id) {
+            return { field: items[i], parent: null, index: i };
+        }
+        if (items[i].children) {
+            const result = findFieldAndParent(items[i].children!, id);
+            if (result.field) {
+                return { ...result, parent: result.parent || items[i] };
+            }
+        }
+    }
+    return { field: null, parent: null, index: -1 };
+  };
+
+  const addFieldToParent = (
+    items: FormField[],
+    parentId: string | null,
+    newField: FormField,
+    insertIndex?: number
+  ): FormField[] => {
+    if (!parentId) {
+        const newItems = [...items];
+        if (typeof insertIndex === 'number' && insertIndex >= 0) {
+            newItems.splice(insertIndex, 0, newField);
+        } else {
+            newItems.push(newField);
+        }
+        return newItems;
+    }
+
+    return items.map((item) => {
+        if (item.id === parentId) {
+            const currentChildren = item.children || [];
+            const newChildren = [...currentChildren];
+            if (typeof insertIndex === 'number' && insertIndex >= 0) {
+                newChildren.splice(insertIndex, 0, newField);
+            } else {
+                newChildren.push(newField);
+            }
+            return { ...item, children: newChildren };
+        }
+        if (item.children) {
+            return {
+                ...item,
+                children: addFieldToParent(item.children, parentId, newField, insertIndex),
+            };
+        }
+        return item;
+    });
+  };
+
+  const removeFieldFromList = (items: FormField[], id: string): FormField[] => {
+      return items
+          .filter(item => item.id !== id)
+          .map(item => ({
+              ...item,
+              children: item.children ? removeFieldFromList(item.children, id) : undefined
+          }));
+  };
+
+  /* -------------------------------------------------------------------------- */
+  /*                               Main Logic                                   */
+  /* -------------------------------------------------------------------------- */
+  
   const [fields, setFields] = useState<FormField[]>([]);
   const [formName, setFormName] = useState("Untitled Form");
   const [formDescription, setFormDescription] = useState("");
@@ -198,7 +281,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     }
   };
 
-  const createNewField = (type: FieldType, insertAfterId?: string) => {
+  const createNewField = (type: FieldType, targetId?: string, position?: 'after' | 'inside') => {
     const newField: FormField = {
       id: nanoid(),
       type,
@@ -213,23 +296,28 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
               ? "Select date"
               : "",
       columnSpan: 12, // Default full width
+      children: type === 'group' ? [] : undefined,
     };
 
-    if (insertAfterId) {
-      const insertIndex = fields.findIndex((f) => f.id === insertAfterId);
-      if (insertIndex !== -1) {
-        setFields((prev) => {
-          const newFields = [...prev];
-          newFields.splice(insertIndex + 1, 0, newField);
-          return newFields;
-        });
-      } else {
-        setFields((prev) => [...prev, newField]);
-      }
-    } else {
-      setFields((prev) => [...prev, newField]);
-    }
+    if (targetId) {
+        // If 'inside', we are dropping into a group
+        if (position === 'inside') {
+             setFields(prev => addFieldToParent(prev, targetId, newField));
+             setSelectedFieldId(newField.id);
+             return newField;
+        }
 
+        // If 'after', insert after the target field
+        const { parent, index } = findFieldAndParent(fields, targetId);
+        if (index !== -1) {
+             setFields(prev => addFieldToParent(prev, parent ? parent.id : null, newField, index + 1));
+             setSelectedFieldId(newField.id);
+             return newField;
+        }
+    }
+    
+    // Default: Add to root
+    setFields((prev) => [...prev, newField]);
     setSelectedFieldId(newField.id);
     return newField;
   };
@@ -248,83 +336,180 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     if (active.data.current?.isToolboxItem) {
       const type = active.data.current.type as FieldType;
 
-      // STRICT: Only create field if dropping EXACTLY on canvas-droppable or an existing field
-      // Reject all other drop targets (like the outer canvas area, toolbox, etc.)
       if (over.id === "canvas-droppable") {
-        // Dropped directly on the form container
+        // Dropped on main canvas
         createNewField(type);
       } else {
-        // Check if dropping on an existing field
-        const overFieldId = over.id as string;
-        const overField = fields.find((f) => f.id === overFieldId);
-        if (overField) {
-          // Dropped on an existing field - insert after it
-          createNewField(type, overFieldId);
-        }
-        // If neither canvas-droppable nor a field, do nothing (cancel)
+         // Dropped on a field or a group
+         const overId = over.id as string;
+         let targetId = overId;
+         let isInsideGroupDrop = false;
+
+         // Check if we are dropping on a group's specialized dropzone
+         if (over.data.current?.isGroup && over.data.current?.parentId) {
+             targetId = over.data.current.parentId;
+             isInsideGroupDrop = true;
+         }
+
+         const { field: overField } = findFieldAndParent(fields, targetId);
+
+         if (overField) {
+             if (isInsideGroupDrop) {
+                 // Dropped inside a group
+                 createNewField(type, targetId, 'inside');
+             } else {
+                 // Dropped on a field (regular or group acting as item) -> insert after
+                 createNewField(type, targetId, 'after');
+             }
+         }
       }
       return;
     }
 
     // Reordering existing fields
-    // Only reorder if both active and over are existing fields
-    const activeField = fields.find((f) => f.id === active.id);
-    const overField = fields.find((f) => f.id === over.id);
-
-    if (activeField && overField && active.id !== over.id) {
-      setFields((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-
-        if (oldIndex !== -1 && newIndex !== -1) {
-          return arrayMove(items, oldIndex, newIndex);
-        }
-        return items;
-      });
-    }
+    const activeId = active.id as string;
+    const overId = over.id as string;
+    
+    if (activeId === overId) return;
+    
+    // We rely on handleDragOver to have moved the item.
+    // However, dnd-kit sometimes needs final "dragEnd" sort if within same container.
+    // Our handleDragOver handles both.
   };
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeId = active.id as string;
+    let overId = over.id as string;
+    
+    // Resolve overId if it's a dropzone
+    if (over.data.current?.isGroup && over.data.current?.parentId) {
+        overId = over.data.current.parentId;
+    }
 
     if (activeId === overId) return;
 
     // Only handle reordering of existing fields, not toolbox items
-    const isActiveAField = !active.data.current?.isToolboxItem;
-    const isOverAField = fields.find((f) => f.id === overId) !== undefined;
+    if (active.data.current?.isToolboxItem) return;
 
-    // Only reorder if both are existing fields (not toolbox items)
-    if (isActiveAField && isOverAField) {
-      setFields((items) => {
-        const oldIndex = items.findIndex((item) => item.id === activeId);
-        const newIndex = items.findIndex((item) => item.id === overId);
+    // Find active field and its container
+    const activeData = findFieldAndParent(fields, activeId);
+    const overData = findFieldAndParent(fields, overId);
 
-        if (oldIndex !== -1 && newIndex !== -1) {
-          return arrayMove(items, oldIndex, newIndex);
+    if (!activeData.field || !overData.field) {
+        // Try looking for canvas or group drop zones
+        if (overId === 'canvas-droppable') {
+            // Dragging item to root empty space?
+            // If active parent is not null, move to root?
+            // TODO: Logic for moving to root via dragOver on empty canvas is tricky with dnd-kit
+            // usually you drop on *something*. 'canvas-droppable' is the "SortableContext" container?
+            // If SortableContext items are full, you drop on an item.
+            return;
         }
-        return items;
-      });
+        
+        // Check if over is a group container (receiving drop)
+        const possibleGroup = findFieldAndParent(fields, overId).field;
+        if (possibleGroup && possibleGroup.type === 'group') {
+            // Moving into a group
+            // Remove from old, add to new
+            setFields(prev => {
+                const withoutActive = removeFieldFromList(prev, activeId);
+                return addFieldToParent(withoutActive, overId, activeData.field!);
+            });
+            return;
+        }
+        
+        return;
     }
-    // Do nothing for toolbox items during drag over - only handle on drag end
+
+    const startParentId = activeData.parent ? activeData.parent.id : 'root';
+    const endParentId = overData.parent ? overData.parent.id : 'root';
+
+    if (startParentId === endParentId) {
+        // Reorder within same list
+        setFields(prev => {
+             // We need to act on the specific list
+             const newFields = [...prev];
+             
+             // Define helper to swap in path
+             const swapInList = (items: FormField[], parentId: string | null): FormField[] => {
+                if (parentId === 'root' && items === prev) {
+                   // This is root
+                   const oldIndex = items.findIndex(i => i.id === activeId);
+                   const newIndex = items.findIndex(i => i.id === overId);
+                   if (oldIndex !== -1 && newIndex !== -1) {
+                       return arrayMove(items, oldIndex, newIndex);
+                   }
+                   return items;
+                }
+                
+                return items.map(item => {
+                   if (item.id === parentId) {
+                       // This is the parent
+                       const children = item.children || [];
+                       const oldIndex = children.findIndex(i => i.id === activeId);
+                       const newIndex = children.findIndex(i => i.id === overId);
+                       if (oldIndex !== -1 && newIndex !== -1) {
+                           return { ...item, children: arrayMove(children, oldIndex, newIndex) };
+                       }
+                   }
+                   if (item.children) {
+                       return { ...item, children: swapInList(item.children, parentId) };
+                   }
+                   return item;
+                });
+             };
+             
+             return swapInList(newFields, endParentId === 'root' ? 'root' : endParentId);
+        });
+    } else {
+        // Moving between lists (e.g. root to group or group to group)
+        setFields(prev => {
+            const fieldToMove = activeData.field!;
+            const withoutActive = removeFieldFromList(prev, activeId);
+            // Insert into new parent at specific index
+            const targetParentId = overData.parent ? overData.parent.id : null;
+            // "Over" is the item we are hovering over. We want to place relative to it.
+            // Usually we insert matching the index of 'over'.
+            
+            // Find index of over in the NEW list (which is currently in 'withoutActive' tree?)
+            // Wait, 'over' is in 'prev'.
+            // In 'withoutActive', 'over' should still exist (unless over was active, which is impossible).
+            
+            const overInNew = findFieldAndParent(withoutActive, overId);
+            if (overInNew.index !== -1) {
+                 return addFieldToParent(withoutActive, targetParentId, fieldToMove, overInNew.index);
+            }
+            return withoutActive;
+        });
+    }
   };
 
   const handleFieldSelect = (id: string) => {
     setSelectedFieldId(id);
   };
 
+  const updateFieldRecursive = (items: FormField[], id: string, updates: Partial<FormField>): FormField[] => {
+      return items.map(item => {
+          if (item.id === id) {
+              return { ...item, ...updates };
+          }
+          if (item.children) {
+              return { ...item, children: updateFieldRecursive(item.children, id, updates) };
+          }
+          return item;
+      });
+  };
+
   const handleFieldUpdate = (id: string, updates: Partial<FormField>) => {
-    setFields((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, ...updates } : f)),
-    );
+    setFields((prev) => updateFieldRecursive(prev, id, updates));
   };
 
   const handleFieldDelete = (id: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    setFields((prev) => prev.filter((f) => f.id !== id));
+    setFields((prev) => removeFieldFromList(prev, id));
     if (selectedFieldId === id) setSelectedFieldId(null);
   };
 
@@ -351,7 +536,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
 
   const handleDescriptionEdit = () => {
     setIsEditingDescription(true);
-  };
+    };
 
   const handleDescriptionSave = () => {
     setIsEditingDescription(false);
@@ -399,7 +584,8 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     }
   };
 
-  const selectedField = fields.find((f) => f.id === selectedFieldId) || null;
+  const selectedFieldData = selectedFieldId ? findFieldAndParent(fields, selectedFieldId).field : null;
+  const selectedField = selectedFieldData || null;
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {

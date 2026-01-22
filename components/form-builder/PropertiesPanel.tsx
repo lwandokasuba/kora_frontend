@@ -75,17 +75,19 @@ export default function PropertiesPanel({ field, onChange, onDelete, onSave }: P
 
             <div className="space-y-6 flex-1">
                 <div className="space-y-2">
-                    <Label htmlFor="label" className="text-sm font-medium text-gray-900 dark:text-gray-100">Field Label</Label>
+                    <Label htmlFor="label" className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {field.type === 'group' ? 'Group Name' : 'Field Label'}
+                    </Label>
                     <Input
                         id="label"
                         value={field.label}
                         onChange={(e) => onChange(field.id, { label: e.target.value })}
-                        placeholder="Enter field label"
+                        placeholder={field.type === 'group' ? "Enter group name" : "Enter field label"}
                         className="bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-md"
                     />
                 </div>
 
-                {field.type !== 'checkbox' && (
+                {field.type !== 'checkbox' && field.type !== 'group' && (
                     <div className="space-y-2">
                         <Label htmlFor="placeholder" className="text-sm font-medium text-gray-900 dark:text-gray-100">Placeholder</Label>
                         <Input
@@ -98,14 +100,16 @@ export default function PropertiesPanel({ field, onChange, onDelete, onSave }: P
                     </div>
                 )}
 
-                <div className="flex items-center justify-between p-4 border border-stone-200 dark:border-stone-700 rounded-lg bg-stone-50 dark:bg-stone-800/50">
-                    <Label htmlFor="required" className="cursor-pointer text-sm font-medium text-gray-900 dark:text-gray-100">Required Field</Label>
-                    <Switch
-                        id="required"
-                        checked={field.required}
-                        onCheckedChange={(checked) => onChange(field.id, { required: checked })}
-                    />
-                </div>
+                {field.type !== 'group' && (
+                    <div className="flex items-center justify-between p-4 border border-stone-200 dark:border-stone-700 rounded-lg bg-stone-50 dark:bg-stone-800/50">
+                        <Label htmlFor="required" className="cursor-pointer text-sm font-medium text-gray-900 dark:text-gray-100">Required Field</Label>
+                        <Switch
+                            id="required"
+                            checked={field.required}
+                            onCheckedChange={(checked) => onChange(field.id, { required: checked })}
+                        />
+                    </div>
+                )}
 
                 {/* Column Width Control */}
                 <div className="space-y-3">
