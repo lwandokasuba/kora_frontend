@@ -242,6 +242,16 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [newServiceName, setNewServiceName] = useState("");
   const [serviceError, setServiceError] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [descriptionError, setDescriptionError] = useState(false);
+
+  useEffect(() => {
+    if (formName.trim() && formName !== "Untitled Form") setNameError(false);
+  }, [formName]);
+
+  useEffect(() => {
+    if (formDescription.trim()) setDescriptionError(false);
+  }, [formDescription]);
 
   const createFieldMutation = useCreateField();
   const createServiceMutation = useCreateService();
@@ -785,8 +795,17 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const updateFormMutation = useUpdateForm();
 
   const handleSave = async () => {
-    if (!formName.trim()) {
-      toast.error("Please provide a form name");
+    // Validate Name
+    if (!formName.trim() || formName === "Untitled Form") {
+      toast.error("Please provide a valid form name");
+      setNameError(true);
+      return;
+    }
+
+    // Validate Description
+    if (!formDescription.trim()) {
+      toast.error("Please provide a form description");
+      setDescriptionError(true);
       return;
     }
 
@@ -797,6 +816,9 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     }
     
     setServiceError(false);
+    setNameError(false);
+    setDescriptionError(false);
+    
     const toastId = toast.loading("Saving form...");
 
     try {
