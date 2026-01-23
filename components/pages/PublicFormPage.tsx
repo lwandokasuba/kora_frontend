@@ -72,7 +72,7 @@ const businessClasses = {
 export default function PublicFormPage({ formId, serviceId }: PublicFormPageProps) {
   const router = useRouter();
   const { data: form } = useForm(Number(formId));
-  const { data: service } = useService(serviceId ? Number(serviceId) : undefined);
+  const { data: service } = useService(serviceId ? Number(serviceId) : 0);
   const [step, setStep] = useState(1);
   const [businessType, setBusinessType] = useState("");
   const [businessCategory, setBusinessCategory] = useState("");
