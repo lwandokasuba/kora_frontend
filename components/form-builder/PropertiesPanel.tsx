@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Trash2, Save } from 'lucide-react';
+import { Trash2, Save, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PropertiesPanelProps {
@@ -15,20 +15,29 @@ interface PropertiesPanelProps {
     onChange: (fieldId: string, updates: Partial<FormField>) => void;
     onDelete: (fieldId: string) => void;
     onSave: () => void;
+    onPreview: () => void;
 }
 
-export default function PropertiesPanel({ field, onChange, onDelete, onSave }: PropertiesPanelProps) {
+export default function PropertiesPanel({ field, onChange, onDelete, onSave, onPreview }: PropertiesPanelProps) {
     if (!field) {
         return (
             <aside className="hidden lg:block w-80 border-l border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-950 p-4 lg:p-6 overflow-y-auto flex flex-col rounded-l-lg">
-                <div className="mb-6">
+                <div className="mb-6 space-y-2">
                     <Button 
                         onClick={onSave} 
-                        className="w-full gap-2"
+                        className="w-full gap-2 text-white hover:bg-[#9A6E35]"
                         style={{ backgroundColor: '#B4813F' }}
                     >
                         <Save className="h-4 w-4" />
                         <span>Save Form</span>
+                    </Button>
+                    <Button 
+                        onClick={onPreview} 
+                        variant="outline"
+                        className="w-full gap-2 border-[#B4813F] text-[#B4813F] hover:bg-[#B4813F]/10"
+                    >
+                        <Eye className="h-4 w-4" />
+                        <span>Preview Form</span>
                     </Button>
                 </div>
                 <div className="mb-4">
@@ -46,14 +55,22 @@ export default function PropertiesPanel({ field, onChange, onDelete, onSave }: P
 
     return (
         <aside className="hidden lg:flex w-80 border-l border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-950 p-4 lg:p-6 overflow-y-auto h-full flex-col rounded-l-lg">
-            <div className="mb-6">
+            <div className="mb-6 space-y-2">
                 <Button 
                     onClick={onSave} 
-                    className="w-full gap-2"
+                    className="w-full gap-2 text-white hover:bg-[#9A6E35]"
                     style={{ backgroundColor: '#B4813F' }}
                 >
                     <Save className="h-4 w-4" />
                     <span>Save Form</span>
+                </Button>
+                <Button 
+                    onClick={onPreview} 
+                    variant="outline"
+                    className="w-full gap-2 border-[#B4813F] text-[#B4813F] hover:bg-[#B4813F]/10"
+                >
+                    <Eye className="h-4 w-4" />
+                    <span>Preview Form</span>
                 </Button>
             </div>
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-stone-200 dark:border-stone-700">

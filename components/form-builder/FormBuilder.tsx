@@ -26,6 +26,7 @@ import { FormField, FIELD_TYPES, FieldType, transformFieldsToToolboxItems, DATA_
 import { ToolboxItem, ToolboxItemOverlay } from "./ToolboxItem";
 import { SortableField } from "./SortableField";
 import PropertiesPanel from "./PropertiesPanel";
+import { FormPreview } from "./FormPreview";
 import { CanvasDropZone } from "./CanvasDropZone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +57,7 @@ import {
   updateForm,
   setCurrentForm,
 } from "@/lib/features/formBuilder/formSlice";
-import { useFields, useCreateField, useGroups } from "@/hooks";
+import { useFields, useCreateField, useGroups, useDataTypes } from "@/hooks";
 
 interface FormBuilderProps {
   formId?: string;
@@ -70,13 +71,14 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
 
   const { data: dbFields, isLoading: isLoadingFields, error: fieldsError } = useFields();
   const { data: dbGroups, isLoading: isLoadingGroups } = useGroups();
+  const { data: dbDataTypes, isLoading: isLoadingDataTypes } = useDataTypes();
 
   // Transform database fields to toolbox items, with fallback to hardcoded types
   const availableFieldTypes = useMemo(() => {
     let items: { type: FieldType; label: string; id?: string; groupId?: string }[] = [];
     
-    if (dbFields && dbFields.length > 0) {
-      items = transformFieldsToToolboxItems(dbFields);
+    if (dbFields && dbFields.length > 0 && dbDataTypes) {
+      items = transformFieldsToToolboxItems(dbFields, dbDataTypes);
     }
     
     // If no fields could be transformed or DB is empty, use default types
@@ -91,7 +93,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     }
     
     return items;
-  }, [dbFields]);
+  }, [dbFields, dbDataTypes]);
 
   // Separate fields into groups and individual fields
   // "Groups" here refers to pre-defined groups from the DB + the generic Group tool
@@ -196,6 +198,8 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const [isHoveringDescription, setIsHoveringDescription] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const descriptionInputRef = useRef<HTMLInputElement>(null);
+  
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
@@ -235,9 +239,19 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
     }
 
     try {
+      // Find the ID for the selected data type
+      const selectedDataType = dbDataTypes?.find(
+        dt => dt.data_type.toLowerCase() === newFieldDataType.toLowerCase()
+      );
+
+      if (!selectedDataType) {
+        toast.error("Invalid data type selected");
+        return;
+      }
+
       await createFieldMutation.mutateAsync({
         label: newFieldLabel.trim(),
-        data_type: newFieldDataType,
+        data_type_id: selectedDataType.id,
         group_id: null,
       });
       
@@ -330,14 +344,18 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
         // Find fields belonging to this group
         const groupFields = dbFields.filter(f => f.group_id?.toString() === groupId);
         
-        children = groupFields.map(gf => ({
-            id: nanoid(),
-            type: DATA_TYPE_TO_FIELD_TYPE[gf.data_type.toLowerCase()] || 'text',
-            label: gf.label,
-            required: false,
-            placeholder: "",
-            columnSpan: 12
-        }));
+        children = groupFields.map(gf => {
+            const dt = dbDataTypes?.find(t => t.id === gf.data_type_id);
+            const typeStr = dt?.data_type || 'text';
+            return {
+                id: nanoid(),
+                type: DATA_TYPE_TO_FIELD_TYPE[typeStr.toLowerCase()] || 'text',
+                label: gf.label,
+                required: false,
+                placeholder: "",
+                columnSpan: 12
+            };
+        });
     } else if (type === 'group') {
         children = [];
     }
@@ -1042,14 +1060,24 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
             </div>
           </div>
 
+
           {/* Properties Sidebar */}
           <PropertiesPanel
             field={selectedField}
             onChange={handleFieldUpdate}
             onDelete={handleFieldDelete}
             onSave={handleSave}
+            onPreview={() => setIsPreviewOpen(true)}
           />
         </main>
+
+        <FormPreview
+            fields={fields}
+            title={formName}
+            description={formDescription}
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+        />
 
         <DragOverlay>
           {activeId ? (
