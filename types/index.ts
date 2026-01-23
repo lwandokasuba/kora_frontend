@@ -4,7 +4,9 @@ import { z } from 'zod';
 // Group Schema
 export const GroupSchema = z.object({
     id: z.number().int(),
-    group_name: z.string().max(50)
+    group_name: z.string().max(50),
+    field_span: z.number().int().nullable().optional(),
+    field_row: z.number().int().nullable().optional(),
 });
 
 export type Group = z.infer<typeof GroupSchema>;
@@ -54,7 +56,9 @@ export const FormFieldSchema = z.object({
     form_id: z.number().int(),
     field_id: z.number().int(),
     field_name: z.string().max(50).nullable().optional(),
-    validation: z.string().max(250).nullable().optional()
+    validation: z.string().max(250).nullable().optional(),
+    field_span: z.number().int().nullable().optional(),
+    field_row: z.number().int().nullable().optional(),
 });
 
 export type FormField = z.infer<typeof FormFieldSchema>;
@@ -195,3 +199,9 @@ export type UpdateCollection = z.infer<typeof UpdateCollectionSchema>;
 
 export const UpdateCollectionItemSchema = CollectionItemSchema.partial().extend({ id: z.number().int() });
 export type UpdateCollectionItem = z.infer<typeof UpdateCollectionItemSchema>;
+
+export const CreateReservedNameSchema = ReservedNameSchema.omit({ id: true });
+export type CreateReservedName = z.infer<typeof CreateReservedNameSchema>;
+
+export const UpdateReservedNameSchema = ReservedNameSchema.partial().extend({ id: z.number().int() });
+export type UpdateReservedName = z.infer<typeof UpdateReservedNameSchema>;
