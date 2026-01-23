@@ -241,6 +241,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [newServiceName, setNewServiceName] = useState("");
+  const [serviceError, setServiceError] = useState(false);
 
   const createFieldMutation = useCreateField();
   const createServiceMutation = useCreateService();
@@ -788,7 +789,14 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
       toast.error("Please provide a form name");
       return;
     }
+
+    if (!selectedServiceId) {
+      toast.error("Please select a service");
+      setServiceError(true);
+      return;
+    }
     
+    setServiceError(false);
     const toastId = toast.loading("Saving form...");
 
     try {
@@ -1373,6 +1381,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
             services={uiServices}
             selectedServiceId={selectedServiceId}
             onServiceChange={setSelectedServiceId}
+            serviceError={serviceError}
             onCreateService={() => setIsCreatingService(true)}
             collections={collections}
             collectionItems={allCollectionItems}

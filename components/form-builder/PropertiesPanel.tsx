@@ -119,6 +119,7 @@ interface PropertiesPanelProps {
     services?: { id: number; service_name: string }[];
     selectedServiceId?: number | null;
     onServiceChange?: (serviceId: number) => void;
+    serviceError?: boolean;
     onCreateService?: () => void;
     
     // Collection Props
@@ -138,6 +139,7 @@ export default function PropertiesPanel({
     services,
     selectedServiceId,
     onServiceChange,
+    serviceError,
     onCreateService,
     collections,
     collectionItems,
@@ -145,6 +147,14 @@ export default function PropertiesPanel({
     onAddCollectionItem,
     onDeleteCollectionItem
 }: PropertiesPanelProps) {
+    const serviceSelectRef = React.useRef<HTMLSelectElement>(null);
+
+    React.useEffect(() => {
+        if (serviceError && serviceSelectRef.current) {
+            serviceSelectRef.current.focus();
+        }
+    }, [serviceError]);
+
     if (!field) {
         return (
             <aside className="hidden lg:block w-80 border-l border-stone-200 dark:border-stone-800 bg-stone-100 dark:bg-stone-950 p-4 lg:p-6 overflow-y-auto flex flex-col rounded-l-lg">
@@ -174,15 +184,21 @@ export default function PropertiesPanel({
                     </p>
 
                     <div className="space-y-3">
-                        <Label htmlFor="service" className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                           Form Service
+                        <Label htmlFor="service" className={cn("text-sm font-medium", serviceError ? "text-red-500" : "text-gray-900 dark:text-gray-100")}>
+                           Form Service {serviceError && "(Required)"}
                         </Label>
                         <div className="space-y-2">
                             <select
                                 id="service"
+                                ref={serviceSelectRef}
                                 value={selectedServiceId || ''}
                                 onChange={(e) => onServiceChange?.(Number(e.target.value))}
-                                className="flex h-10 w-full items-center justify-between rounded-md border border-stone-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-950 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-stone-800 dark:bg-stone-950 dark:ring-offset-stone-950 dark:placeholder:text-stone-400 dark:focus:ring-stone-300"
+                                className={cn(
+                                    "flex h-10 w-full items-center justify-between rounded-md border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-stone-950 dark:ring-offset-stone-950 dark:placeholder:text-stone-400",
+                                    serviceError 
+                                        ? "border-red-500 focus:ring-red-500 text-red-900 dark:text-red-100" 
+                                        : "border-stone-200 dark:border-stone-800 focus:ring-stone-950 dark:focus:ring-stone-300"
+                                )}
                             >
                                 <option value="">Select a Service...</option>
                                 {services?.map(service => (
