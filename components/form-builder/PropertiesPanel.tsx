@@ -17,6 +17,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function AddCollectionDialog({ onCreate }: { onCreate?: (name: string) => void }) {
     const [open, setOpen] = useState(false);
@@ -341,33 +347,35 @@ export default function PropertiesPanel({
                 <div className="space-y-3">
                     <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">Field Width</Label>
                     <div className="grid grid-cols-4 gap-2">
+                        <TooltipProvider>
                         {[12, 6, 4, 3].map((span) => {
                             const percentage = Math.round((span / 12) * 100);
                             const isSelected = (field.columnSpan || 12) === span;
+                            const label = span === 12 ? "Full width" : span === 6 ? "Half width" : span === 4 ? "One third" : "One quarter";
                             return (
-                                <button
-                                    key={span}
-                                    onClick={() => onChange(field.id, { columnSpan: span })}
-                                    className={cn(
-                                        "p-2.5 text-xs font-medium border rounded-md transition-all",
-                                        isSelected
-                                            ? "text-white border-[#B4813F] font-semibold"
-                                            : "bg-white dark:bg-stone-800 text-gray-700 dark:text-gray-300 hover:bg-stone-100 dark:hover:bg-stone-700 border-stone-200 dark:border-stone-700"
-                                    )}
-                                    style={isSelected ? { backgroundColor: '#B4813F' } : undefined}
-                                    title={`${percentage}% width`}
-                                >
-                                    {percentage}%
-                                </button>
+                                <Tooltip key={span}>
+                                    <TooltipTrigger asChild>
+                                        <button
+                                            onClick={() => onChange(field.id, { columnSpan: span })}
+                                            className={cn(
+                                                "p-2.5 text-xs font-medium border rounded-md transition-all",
+                                                isSelected
+                                                    ? "text-white border-[#B4813F] font-semibold"
+                                                    : "bg-white dark:bg-stone-800 text-gray-700 dark:text-gray-300 hover:bg-stone-100 dark:hover:bg-stone-700 border-stone-200 dark:border-stone-700"
+                                            )}
+                                            style={isSelected ? { backgroundColor: '#B4813F' } : undefined}
+                                        >
+                                            {percentage}%
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>{label} ({12/span} columns)</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             );
                         })}
+                        </TooltipProvider>
                     </div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {(field.columnSpan || 12) === 12 && "Full width"}
-                        {(field.columnSpan || 12) === 6 && "Half width (2 columns)"}
-                        {(field.columnSpan || 12) === 4 && "One third width (3 columns)"}
-                        {(field.columnSpan || 12) === 3 && "One quarter width (4 columns)"}
-                    </p>
                 </div>
 
                 {/* Type-specific settings could go here */}
