@@ -499,7 +499,7 @@ class MockDatabase {
         label: "Province",
         data_type_id: 5,
         group_id: 2,
-        status: true,
+        status: false,
         collection_id: 5,
       },
       {
@@ -507,7 +507,7 @@ class MockDatabase {
         label: "Town",
         data_type_id: 5,
         group_id: 2,
-        status: true,
+        status: false,
         collection_id: null,
       },
       {
@@ -515,7 +515,7 @@ class MockDatabase {
         label: "Area",
         data_type_id: 5,
         group_id: 2,
-        status: true,
+        status: false,
         collection_id: null,
       },
       {
@@ -523,7 +523,7 @@ class MockDatabase {
         label: "Street",
         data_type_id: 1,
         group_id: 2,
-        status: true,
+        status: false,
         collection_id: null,
       },
       {
@@ -531,7 +531,7 @@ class MockDatabase {
         label: "Plot House Village",
         data_type_id: 1,
         group_id: 2,
-        status: true,
+        status: false,
         collection_id: null,
       },
       {
@@ -539,7 +539,7 @@ class MockDatabase {
         label: "Entity Type",
         data_type_id: 5,
         group_id: 3,
-        status: true,
+        status: false,
         collection_id: 2,
       },
       {
@@ -547,7 +547,7 @@ class MockDatabase {
         label: "Entity Limit",
         data_type_id: 5,
         group_id: 3,
-        status: true,
+        status: false,
         collection_id: 7,
       },
       {
@@ -555,7 +555,7 @@ class MockDatabase {
         label: "Entity Category",
         data_type_id: 5,
         group_id: 3,
-        status: true,
+        status: false,
         collection_id: 8,
       },
       {
@@ -563,7 +563,7 @@ class MockDatabase {
         label: "Justification",
         data_type_id: 1,
         group_id: null,
-        status: true,
+        status: false,
         collection_id: null,
       },
       {
@@ -579,7 +579,7 @@ class MockDatabase {
         label: "Business Activity",
         data_type_id: 6,
         group_id: null,
-        status: true,
+        status: false,
         collection_id: 9,
       },
       {
@@ -587,7 +587,7 @@ class MockDatabase {
         label: "Promoter Name",
         data_type_id: 1,
         group_id: null,
-        status: true,
+        status: false,
         collection_id: null,
       },
       {
@@ -598,11 +598,107 @@ class MockDatabase {
         status: true,
         collection_id: null,
       },
+      {
+        id: 30,
+        label: "Proposed Name 2",
+        data_type_id: 1,
+        group_id: null,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 31,
+        label: "Proposed Name 3",
+        data_type_id: 1,
+        group_id: null,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 32,
+        label: "Person Lodging First Name",
+        data_type_id: 1,
+        group_id: 1,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 33,
+        label: "Person Lodging Last Name",
+        data_type_id: 1,
+        group_id: 1,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 34,
+        label: "Person Lodging Gender",
+        data_type_id: 5,
+        group_id: 1,
+        status: false,
+        collection_id: 1,
+      },
+      {
+        id: 35,
+        label: "Person Lodging Date of Birth",
+        data_type_id: 3,
+        group_id: 1,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 36,
+        label: "Person Lodging Nationality",
+        data_type_id: 5,
+        group_id: 1,
+        status: false,
+        collection_id: 4,
+      },
+      {
+        id: 37,
+        label: "Person Lodging Identity Type",
+        data_type_id: 5,
+        group_id: 1,
+        status: false,
+        collection_id: 3,
+      },
+      {
+        id: 38,
+        label: "Person Lodging Identity Number",
+        data_type_id: 1,
+        group_id: 1,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 39,
+        label: "Person Lodging Phone Number",
+        data_type_id: 1,
+        group_id: 1,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 40,
+        label: "Person Lodging Email Address",
+        data_type_id: 1,
+        group_id: 1,
+        status: false,
+        collection_id: null,
+      },
+      {
+        id: 41,
+        label: "Person Lodging Country",
+        data_type_id: 5,
+        group_id: 2,
+        status: false,
+        collection_id: 4,
+      },
     ];
 
     // Services from SQL
     this.services = [
-      { id: 1, service_name: "Name Clearance" },
+      { id: 1, service_name: "NAME CLEARANCE" },
       // { id: 2, service_name: 'Name Reservation' },
       // { id: 3, service_name: 'Entity Registration' }
     ];
@@ -928,7 +1024,7 @@ class MockDatabase {
       {
         id: 27,
         form_id: 1,
-        field_id: 26,
+        field_id: 30,
         field_name: "Proposed Name 2",
         validation: "validate_reserved_name",
         field_span: 0,
@@ -938,7 +1034,7 @@ class MockDatabase {
       {
         id: 28,
         form_id: 1,
-        field_id: 26,
+        field_id: 31,
         field_name: "Proposed Name 3",
         validation: "validate_reserved_name",
         field_span: 0,
@@ -994,7 +1090,7 @@ class MockDatabase {
       {
         id: 32,
         form_id: 1,
-        field_id: 1,
+        field_id: 32,
         field_name: "Person Lodging First Name",
         validation: ",2",
         field_span: 0,
@@ -1014,7 +1110,7 @@ class MockDatabase {
       {
         id: 34,
         form_id: 1,
-        field_id: 3,
+        field_id: 33,
         field_name: "Person Lodging Last Name",
         validation: ",2",
         field_span: 0,
@@ -1024,7 +1120,7 @@ class MockDatabase {
       {
         id: 35,
         form_id: 1,
-        field_id: 4,
+        field_id: 34,
         field_name: "Person Lodging Gender",
         validation: ",2",
         field_span: 0,
@@ -1034,7 +1130,7 @@ class MockDatabase {
       {
         id: 36,
         form_id: 1,
-        field_id: 5,
+        field_id: 35,
         field_name: "Person Lodging Date of Birth",
         validation: ",2",
         field_span: 0,
@@ -1044,7 +1140,7 @@ class MockDatabase {
       {
         id: 37,
         form_id: 1,
-        field_id: 6,
+        field_id: 36,
         field_name: "Person Lodging Nationality",
         validation: ",2",
         field_span: 0,
@@ -1054,7 +1150,7 @@ class MockDatabase {
       {
         id: 38,
         form_id: 1,
-        field_id: 7,
+        field_id: 37,
         field_name: "Person Lodging Identity Type",
         validation: ",2",
         field_span: 0,
@@ -1064,7 +1160,7 @@ class MockDatabase {
       {
         id: 39,
         form_id: 1,
-        field_id: 8,
+        field_id: 38,
         field_name: "Person Lodging Identity Number",
         validation: ",2",
         field_span: 0,
@@ -1074,7 +1170,7 @@ class MockDatabase {
       {
         id: 40,
         form_id: 1,
-        field_id: 14,
+        field_id: 39,
         field_name: "Person Lodging Phone Number",
         validation: ",2",
         field_span: 0,
@@ -1084,7 +1180,7 @@ class MockDatabase {
       {
         id: 41,
         form_id: 1,
-        field_id: 15,
+        field_id: 40,
         field_name: "Person Lodging Email Address",
         validation: ",2",
         field_span: 0,
@@ -1094,7 +1190,7 @@ class MockDatabase {
       {
         id: 42,
         form_id: 1,
-        field_id: 16,
+        field_id: 41,
         field_name: "Person Lodging Country",
         validation: ",2",
         field_span: 0,

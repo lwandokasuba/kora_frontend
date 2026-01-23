@@ -68,24 +68,21 @@ export default function ServiceDetailsPage({
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {forms.map((form) => (
-                <div
-                  key={form.id}
-                  className="relative group text-left"
-                >
+                <div key={form.id} className="relative group text-left">
                   <div
                     onClick={() => setSelectedForm(form)}
                     className="cursor-pointer bg-white dark:bg-stone-800 rounded shadow-md hover:shadow-lg transition-shadow p-4 aspect-[8.5/11] flex flex-col items-center justify-center text-center"
                   >
-                     <button 
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/services/configure?id=${form.id}`);
-                        }}
-                        className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-500 transition-colors"
-                        title="Configure Form"
-                     >
-                        <Settings className="w-4 h-4" />
-                     </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/services/configure?id=${form.id}`);
+                      }}
+                      className="absolute top-2 right-2 p-1.5 rounded-full hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-500 transition-colors"
+                      title="Configure Form"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
                     <svg
                       className="w-10 h-10 mb-2 text-red-600 dark:text-red-500"
                       fill="currentColor"
@@ -209,8 +206,8 @@ export default function ServiceDetailsPage({
                         className="border border-stone-900 dark:border-stone-300 p-2 font-bold text-center"
                       >
                         {selectedForm.id === 3
-                          ? "APPLICATION FOR INCORPORATION"
-                          : "APPLICATION FOR NAME CLEARANCE"}
+                          ? "INCORPORATION"
+                          : "NAME CLEARANCE"}
                       </th>
                     </tr>
                     <tr className="bg-yellow-100 dark:bg-yellow-900">

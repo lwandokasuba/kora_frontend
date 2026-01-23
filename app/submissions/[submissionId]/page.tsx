@@ -91,13 +91,6 @@ export default function SubmissionDetailPage() {
               <ArrowLeft className="h-4 w-4" />
               Back to Cases
             </Link>
-            <button
-              onClick={handleDownload}
-              className="px-4 py-2 bg-[#8B6F47] hover:bg-[#6F5838] text-white rounded flex items-center gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Download
-            </button>
           </div>
 
           {isLoading ? (
@@ -152,17 +145,17 @@ export default function SubmissionDetailPage() {
 
                 <table className="w-full border-collapse border border-stone-900 dark:border-stone-300 text-sm">
                   <thead>
-                    <tr className="bg-yellow-100 dark:bg-yellow-900">
+                    <tr style={{backgroundColor: '#ffe598'}}>
                       <th
                         colSpan={4}
                         className="border border-stone-900 dark:border-stone-300 p-2 font-bold text-center"
                       >
                         {form?.id === 3
-                          ? "APPLICATION FOR INCORPORATION"
-                          : "APPLICATION FOR NAME CLEARANCE"}
+                          ? "INCORPORATION"
+                          : "NAME CLEARANCE"}
                       </th>
                     </tr>
-                    <tr className="bg-yellow-100 dark:bg-yellow-900">
+                    <tr style={{backgroundColor: '#ffe598'}}>
                       <th
                         colSpan={4}
                         className="border border-stone-900 dark:border-stone-300 p-2 text-center"
@@ -192,7 +185,7 @@ export default function SubmissionDetailPage() {
                           <td className="border border-stone-900 dark:border-stone-300 p-2 bg-white dark:bg-stone-800">
                             {answer}
                           </td>
-                          <td className="border border-stone-900 dark:border-stone-300 p-2 w-48 bg-yellow-50 dark:bg-yellow-900/20 text-xs italic dark:text-stone-400"></td>
+                          <td className="border border-stone-900 dark:border-stone-300 p-2 w-48 text-xs italic dark:text-stone-400" style={{backgroundColor: '#ffe598'}}></td>
                         </tr>
                       ))}
                   </tbody>
@@ -201,7 +194,7 @@ export default function SubmissionDetailPage() {
                 {formFieldsWithAnswers.length > 10 && (
                   <table className="w-full border-collapse border border-stone-900 dark:border-stone-300 text-sm mt-8">
                     <thead>
-                      <tr className="bg-yellow-100 dark:bg-yellow-900">
+                      <tr style={{backgroundColor: '#ffe598'}}>
                         <th
                           colSpan={4}
                           className="border border-stone-900 dark:border-stone-300 p-2 text-center"
@@ -231,7 +224,7 @@ export default function SubmissionDetailPage() {
                             <td className="border border-stone-900 dark:border-stone-300 p-2 bg-white dark:bg-stone-800">
                               {answer}
                             </td>
-                            <td className="border border-stone-900 dark:border-stone-300 p-2 w-48 bg-yellow-50 dark:bg-yellow-900/20 text-xs italic dark:text-stone-400"></td>
+                            <td className="border border-stone-900 dark:border-stone-300 p-2 w-48 text-xs italic dark:text-stone-400" style={{backgroundColor: '#ffe598'}}></td>
                           </tr>
                         ))}
                     </tbody>
