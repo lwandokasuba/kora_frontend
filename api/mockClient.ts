@@ -41,9 +41,9 @@ class MockDatabase {
         console.log('🔄 Initializing mock database...');
 
         this.groups = [
-            { id: 1, group_name: 'Person', field_span: 12, field_row: 1 },
-            { id: 2, group_name: 'Address', field_span: 6, field_row: 2 },
-            { id: 3, group_name: 'Entity', field_span: 6, field_row: 2 }
+            { id: 1, group_name: 'Person' },
+            { id: 2, group_name: 'Address' },
+            { id: 3, group_name: 'Entity' }
         ];
 
         this.reservedNames = [

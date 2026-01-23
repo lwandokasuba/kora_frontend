@@ -5,8 +5,6 @@ import { z } from 'zod';
 export const GroupSchema = z.object({
     id: z.number().int(),
     group_name: z.string().max(50),
-    field_span: z.number().int().nullable().optional(),
-    field_row: z.number().int().nullable().optional(),
 });
 
 export type Group = z.infer<typeof GroupSchema>;
