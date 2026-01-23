@@ -105,7 +105,7 @@ export default function SubmissionDetailPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-lg font-semibold">
-                                Case #{submission?.id || submissionId}
+                                Case {submission?.case_number || ''}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -188,11 +188,11 @@ export default function SubmissionDetailPage() {
                                                         </p>
                                                     )}
                                                 </div>
-                                                {field && (
+                                                {/* {field && (
                                                     <p className="text-xs text-gray-500 dark:text-gray-400">
                                                         Type ID: {field.data_type_id}
                                                     </p>
-                                                )}
+                                                )} */}
                                             </div>
                                         </div>
                                     ))}

@@ -111,23 +111,23 @@ export default function SubmissionsPage() {
                   New Case
                 </Button>
                 <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                <select
-                  value={selectedFormId}
-                  onChange={(e) =>
-                    setSelectedFormId(
-                      e.target.value === "all" ? "all" : Number(e.target.value),
-                    )
-                  }
-                  className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#B4813F] focus:border-transparent"
-                >
-                  <option value="all">All Forms</option>
-                  {forms?.map((form) => (
-                    <option key={form.id} value={form.id}>
-                      {form.form_name}
-                    </option>
-                  ))}
-                </select>
+                  <Filter className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  <select
+                    value={selectedFormId}
+                    onChange={(e) =>
+                      setSelectedFormId(
+                        e.target.value === "all" ? "all" : Number(e.target.value),
+                      )
+                    }
+                    className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#B4813F] focus:border-transparent"
+                  >
+                    <option value="all">All Forms</option>
+                    {forms?.map((form) => (
+                      <option key={form.id} value={form.id}>
+                        {form.form_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </CardHeader>
@@ -167,7 +167,7 @@ export default function SubmissionsPage() {
                       return (
                         <TableRow key={submission.id}>
                           <TableCell className="font-medium">
-                            #{submission.id}
+                            {submission.case_number}
                           </TableCell>
                           <TableCell>
                             {form ? (
