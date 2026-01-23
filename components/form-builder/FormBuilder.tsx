@@ -26,6 +26,7 @@ import { FormField, FIELD_TYPES, FieldType, transformFieldsToToolboxItems, DATA_
 import { ToolboxItem, ToolboxItemOverlay } from "./ToolboxItem";
 import { SortableField } from "./SortableField";
 import PropertiesPanel from "./PropertiesPanel";
+import { FormPreview } from "./FormPreview";
 import { CanvasDropZone } from "./CanvasDropZone";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -197,6 +198,8 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
   const [isHoveringDescription, setIsHoveringDescription] = useState(false);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const descriptionInputRef = useRef<HTMLInputElement>(null);
+  
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
@@ -1057,14 +1060,24 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
             </div>
           </div>
 
+
           {/* Properties Sidebar */}
           <PropertiesPanel
             field={selectedField}
             onChange={handleFieldUpdate}
             onDelete={handleFieldDelete}
             onSave={handleSave}
+            onPreview={() => setIsPreviewOpen(true)}
           />
         </main>
+
+        <FormPreview
+            fields={fields}
+            title={formName}
+            description={formDescription}
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+        />
 
         <DragOverlay>
           {activeId ? (
