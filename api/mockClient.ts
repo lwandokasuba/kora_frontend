@@ -92,6 +92,8 @@ class MockDatabase {
       { id: 7, collection_name: "Entity Limit" },
       { id: 8, collection_name: "Entity Category" },
       { id: 9, collection_name: "Business Activity" },
+      { id: 10, collection_name: "Town" },
+      { id: 11, collection_name: "Area" },
     ];
 
     // Collection Items from SQL
@@ -362,6 +364,112 @@ class MockDatabase {
         collection_item: "Software publishing",
         relation_collection_items_id: null,
       },
+
+      // Town (10) - relation to Province
+      {
+        id: 22,
+        collection_id: 10,
+        collection_item: "Lusaka",
+        relation_collection_items_id: 14,
+      },
+      {
+        id: 42,
+        collection_id: 10,
+        collection_item: "Lusaka Central",
+        relation_collection_items_id: 14,
+      },
+      {
+        id: 46,
+        collection_id: 10,
+        collection_item: "Kafue",
+        relation_collection_items_id: 14,
+      },
+      {
+        id: 47,
+        collection_id: 10,
+        collection_item: "Chilanga",
+        relation_collection_items_id: 14,
+      },
+      {
+        id: 48,
+        collection_id: 10,
+        collection_item: "Kitwe",
+        relation_collection_items_id: 15,
+      },
+      {
+        id: 49,
+        collection_id: 10,
+        collection_item: "Ndola",
+        relation_collection_items_id: 15,
+      },
+      {
+        id: 50,
+        collection_id: 10,
+        collection_item: "Mufulira",
+        relation_collection_items_id: 15,
+      },
+      {
+        id: 51,
+        collection_id: 10,
+        collection_item: "Livingstone Central",
+        relation_collection_items_id: 16,
+      },
+      {
+        id: 52,
+        collection_id: 10,
+        collection_item: "Kazungula",
+        relation_collection_items_id: 16,
+      },
+
+      // Area (11) - relation to Town
+      {
+        id: 43,
+        collection_id: 11,
+        collection_item: "Central Business District",
+        relation_collection_items_id: 22,
+      },
+      {
+        id: 44,
+        collection_id: 11,
+        collection_item: "Woodlands",
+        relation_collection_items_id: 22,
+      },
+      {
+        id: 45,
+        collection_id: 11,
+        collection_item: "Matero",
+        relation_collection_items_id: 22,
+      },
+      {
+        id: 53,
+        collection_id: 11,
+        collection_item: "Kafue Town Centre",
+        relation_collection_items_id: 46,
+      },
+      {
+        id: 54,
+        collection_id: 11,
+        collection_item: "Chilanga Central",
+        relation_collection_items_id: 47,
+      },
+      {
+        id: 55,
+        collection_id: 11,
+        collection_item: "Nkana West",
+        relation_collection_items_id: 48,
+      },
+      {
+        id: 56,
+        collection_id: 11,
+        collection_item: "Ndola Central",
+        relation_collection_items_id: 49,
+      },
+      {
+        id: 57,
+        collection_id: 11,
+        collection_item: "Livingstone CBD",
+        relation_collection_items_id: 51,
+      },
     ];
 
     // Fields from SQL
@@ -508,7 +616,7 @@ class MockDatabase {
         data_type_id: 5,
         group_id: 2,
         status: false,
-        collection_id: null,
+        collection_id: 10,
       },
       {
         id: 19,
@@ -516,7 +624,7 @@ class MockDatabase {
         data_type_id: 5,
         group_id: 2,
         status: false,
-        collection_id: null,
+        collection_id: 11,
       },
       {
         id: 20,
