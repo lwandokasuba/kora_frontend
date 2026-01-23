@@ -1571,13 +1571,59 @@ class MockDatabase {
       { id: 98, form_field_id: 49, answer: "38", submission_id: 2 },
     ];
 
-    // Note: Reserved names are not in the SQL, so we'll leave them empty or with basic data
-    this.reservedNames = [
-      // These would come from a reserved_names table in SQL, but not provided
-      // Keeping minimal data for validation testing
-      { id: 1, reserved_name: "PACRA" },
-      { id: 2, reserved_name: "Patents and Companies Registration Agency" },
-    ];
+this.reservedNames = [
+  { id: 1, reserved_name: "PACRA" },
+  { id: 2, reserved_name: "Patents and Companies Registration Agency" },
+
+  // Government & state identifiers
+  { id: 3, reserved_name: "Republic of Zambia" },
+  { id: 4, reserved_name: "Government of Zambia" },
+  { id: 5, reserved_name: "GRZ" },
+  { id: 6, reserved_name: "Zambia Revenue Authority" },
+  { id: 7, reserved_name: "ZRA" },
+  { id: 8, reserved_name: "Bank of Zambia" },
+  { id: 9, reserved_name: "BOZ" },
+
+  // Famous retail & food brands (Zambia)
+  { id: 10, reserved_name: "Shoprite" },
+  { id: 11, reserved_name: "Pick n Pay" },
+  { id: 12, reserved_name: "Hungry Lion" },
+  { id: 13, reserved_name: "KFC" },
+  { id: 14, reserved_name: "Chicken Inn" },
+  { id: 15, reserved_name: "Pizza Inn" },
+  { id: 16, reserved_name: "Debonairs Pizza" },
+  { id: 17, reserved_name: "Nando's" },
+  { id: 18, reserved_name: "Steers" },
+  { id: 19, reserved_name: "RocoMamas" },
+
+  // Telecoms & tech
+  { id: 20, reserved_name: "MTN" },
+  { id: 21, reserved_name: "Airtel" },
+  { id: 22, reserved_name: "Zamtel" },
+  { id: 23, reserved_name: "Vodacom" },
+
+  // Banks & financial institutions
+  { id: 24, reserved_name: "Zanaco" },
+  { id: 25, reserved_name: "FNB" },
+  { id: 26, reserved_name: "Stanbic" },
+  { id: 27, reserved_name: "Standard Chartered" },
+  { id: 28, reserved_name: "Absa" },
+  { id: 29, reserved_name: "Indo Zambia Bank" },
+  { id: 30, reserved_name: "Access Bank" },
+
+  // Media & utilities
+  { id: 31, reserved_name: "ZNBC" },
+  { id: 32, reserved_name: "ZESCO" },
+  { id: 33, reserved_name: "Lusaka Water Supply" },
+
+  // Breweries & consumer brands
+  { id: 34, reserved_name: "Zambia Breweries" },
+  { id: 35, reserved_name: "Mosi" },
+  { id: 36, reserved_name: "Coca-Cola" },
+  { id: 37, reserved_name: "Pepsi" },
+];
+
+
 
     // Initialize counters based on max ids
     this.idCounters.groups = Math.max(...this.groups.map((g) => g.id), 0) + 1;
