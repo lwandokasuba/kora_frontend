@@ -308,6 +308,20 @@ export default function PropertiesPanel({
                     </div>
                 )}
 
+                {(field.type === 'text' || field.type === 'number') && (
+                    <div className="space-y-2">
+                        <Label htmlFor="regex" className="text-sm font-medium text-gray-900 dark:text-gray-100">Regex Pattern</Label>
+                        <Input
+                            id="regex"
+                            value={field.regex || ''}
+                            onChange={(e) => onChange(field.id, { regex: e.target.value })}
+                            placeholder="e.g. ^[A-Za-z]+$"
+                            className="bg-white dark:bg-stone-800 border-stone-200 dark:border-stone-700 rounded-md font-mono text-xs"
+                        />
+                        <p className="text-[10px] text-gray-500">Regular expression for validation</p>
+                    </div>
+                )}
+
                 {(field.type === 'select' || field.type === 'checkbox') && (
                     <div className="space-y-4 pt-4 border-t border-stone-200 dark:border-stone-700">
                         <Label className="text-sm font-medium text-gray-900 dark:text-gray-100">
