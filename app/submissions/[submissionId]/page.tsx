@@ -35,18 +35,20 @@ export default function SubmissionDetailPage() {
     const formFieldsWithAnswers = useMemo(() => {
         if (!submission?.formFields || !submission?.formAnswers) return []
 
-        return submission.formFields.map((formField) => {
-            const field = fieldsMap[formField.field_id]
-            const answer = submission.formAnswers?.find(
-                (fa) => fa.form_field_id === formField.id
-            )
+        return submission.formFields
+            .map((formField) => {
+                const field = fieldsMap[formField.field_id]
+                const answer = submission.formAnswers?.find(
+                    (fa) => fa.form_field_id === formField.id
+                )
 
-            return {
-                formField,
-                field,
-                answer: answer?.answer || null,
-            }
-        })
+                return {
+                    formField,
+                    field,
+                    answer: answer?.answer || null,
+                }
+            })
+            .filter(item => item.answer !== null && item.answer !== '')
     }, [submission, fieldsMap])
 
     if (!submissionId) {
