@@ -1081,6 +1081,7 @@ export default function FormBuilder({ formId }: FormBuilderProps) {
                               <SortableField
                                 field={field}
                                 isSelected={selectedFieldId === field.id}
+                                selectedFieldId={selectedFieldId}
                                 onSelect={(id) => {
                                   setTimeout(() => handleFieldSelect(id), 0);
                                 }}
